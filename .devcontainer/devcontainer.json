@@ -30,7 +30,7 @@
 	"runArgs": [
 		"--network=host"
 	],
-	"postCreateCommand": "nix-env -iA nixpkgs.nixos-rebuild nixpkgs.nil nixpkgs.git nixpkgs.ragenix nixpkgs.age"
+	"postCreateCommand": "nix-env -iA nixpkgs.nixos-rebuild nixpkgs.nil nixpkgs.git nixpkgs.ragenix nixpkgs.age nixpkgs.compose2nix"
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
