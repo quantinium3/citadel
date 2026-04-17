@@ -3,6 +3,9 @@
     pkgs.wget
     pkgs.openssl
     pkgs.curl
+    pkgs.btop
+
+    pkgs.fastfetch
 
     pkgs.gitMinimal
 
