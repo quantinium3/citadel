@@ -1,0 +1,24 @@
+this is my infra setup for deploying and configuring my personal server on digitalocean with the following components:
+
+# Terraform
+- droplet: creates a digitalocean droplet with 2vcpu, 2gb ram in blr1 region
+- dns: configures cloudflare dns records for the created droplet
+- certificates: provisions ssl certificates via tailscale
+
+# Ansible - deprecated
+- common - base system setup
+- security - server security hardening
+- docker - docker installation
+- containers - container management
+- nginx - nginx setup
+
+# Nixos
+- nixos-anywhere to run nix on my digitalocean droplet
+- agenix for encrypting secrets
+- modules:
+	- tailscale
+	- packages
+	- nginx
+	- networking
+	- user
+
