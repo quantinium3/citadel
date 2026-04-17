@@ -1,12 +1,6 @@
-{ pkgs, lib, config, ... }:
+{ pkgs, lib, ... }:
 
 {
-  networking.firewall.interfaces = let
-    matchAll = if !config.networking.nftables.enable then "podman+" else "podman*";
-  in {
-    "${matchAll}".allowedUDPPorts = [ 53 ];
-  };
-
   virtualisation.oci-containers.containers."http-echo-echo" = {
     image = "hashicorp/http-echo";
     ports = [
