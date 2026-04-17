@@ -23,7 +23,7 @@
     log-driver = "journald";
     extraOptions = [
       "--network-alias=postgres"
-      "--network=postgres_citadel"
+      "--network=citadel"
     ];
   };
   systemd.services."podman-postgres" = {
@@ -31,12 +31,12 @@
       Restart = lib.mkOverride 90 "always";
     };
     after = [
-      "podman-network-postgres_citadel.service"
-      "podman-volume-postgres_postgres_data.service"
+      "podman-network-citadel.service"
+      "podman-volume-postgres_data.service"
     ];
     requires = [
-      "podman-network-postgres_citadel.service"
-      "podman-volume-postgres_postgres_data.service"
+      "podman-network-citadel.service"
+      "podman-volume-postgres_data.service"
     ];
     partOf = [
       "podman-compose-postgres-root.target"
@@ -46,28 +46,28 @@
     ];
   };
 
-  systemd.services."podman-network-postgres_citadel" = {
+  systemd.services."podman-network-citadel" = {
     path = [ pkgs.podman ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStop = "podman network rm -f postgres_citadel";
+      ExecStop = "podman network rm -f citadel";
     };
     script = ''
-      podman network inspect postgres_citadel || podman network create postgres_citadel --driver=bridge
+      podman network inspect citadel || podman network create citadel --driver=bridge
     '';
     partOf = [ "podman-compose-postgres-root.target" ];
     wantedBy = [ "podman-compose-postgres-root.target" ];
   };
 
-  systemd.services."podman-volume-postgres_postgres_data" = {
+  systemd.services."podman-volume-postgres_data" = {
     path = [ pkgs.podman ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
     };
     script = ''
-      podman volume inspect postgres_postgres_data || podman volume create postgres_postgres_data
+      podman volume inspect postgres_data || podman volume create postgres_data
     '';
     partOf = [ "podman-compose-postgres-root.target" ];
     wantedBy = [ "podman-compose-postgres-root.target" ];

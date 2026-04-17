@@ -8,7 +8,7 @@
       "UMASK" = "0022";
     };
     volumes = [
-      "uptime-kuma_uptime_kuma_data:/app/data:rw"
+      "uptime_kuma_data:/app/data:rw"
     ];
     ports = [
       "127.0.0.1:3001:3001/tcp"
@@ -21,7 +21,7 @@
       "--health-start-period=10s"
       "--health-timeout=5s"
       "--network-alias=uptime-kuma"
-      "--network=uptime-kuma_citadel"
+      "--network=citadel"
     ];
   };
   systemd.services."podman-uptime-kuma" = {
@@ -29,12 +29,12 @@
       Restart = lib.mkOverride 90 "always";
     };
     after = [
-      "podman-network-uptime-kuma_citadel.service"
-      "podman-volume-uptime-kuma_uptime_kuma_data.service"
+      "podman-network-citadel.service"
+      "podman-volume-uptime_kuma_data.service"
     ];
     requires = [
-      "podman-network-uptime-kuma_citadel.service"
-      "podman-volume-uptime-kuma_uptime_kuma_data.service"
+      "podman-network-citadel.service"
+      "podman-volume-uptime_kuma_data.service"
     ];
     partOf = [
       "podman-compose-uptime-kuma-root.target"
@@ -44,28 +44,28 @@
     ];
   };
 
-  systemd.services."podman-network-uptime-kuma_citadel" = {
+  systemd.services."podman-network-citadel" = {
     path = [ pkgs.podman ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStop = "podman network rm -f uptime-kuma_citadel";
+      ExecStop = "podman network rm -f citadel";
     };
     script = ''
-      podman network inspect uptime-kuma_citadel || podman network create uptime-kuma_citadel --driver=bridge
+      podman network inspect citadel || podman network create citadel --driver=bridge
     '';
     partOf = [ "podman-compose-uptime-kuma-root.target" ];
     wantedBy = [ "podman-compose-uptime-kuma-root.target" ];
   };
 
-  systemd.services."podman-volume-uptime-kuma_uptime_kuma_data" = {
+  systemd.services."podman-volume-uptime_kuma_data" = {
     path = [ pkgs.podman ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
     };
     script = ''
-      podman volume inspect uptime-kuma_uptime_kuma_data || podman volume create uptime-kuma_uptime_kuma_data
+      podman volume inspect uptime_kuma_data || podman volume create uptime_kuma_data
     '';
     partOf = [ "podman-compose-uptime-kuma-root.target" ];
     wantedBy = [ "podman-compose-uptime-kuma-root.target" ];
