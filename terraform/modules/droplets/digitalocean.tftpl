@@ -1,0 +1,15 @@
+#cloud-config
+ssh_pwauth: false
+users:
+  - name: ${user}
+    gecos: User Account
+    groups: users,admin,sudo
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ${ssh_key}
+
+runcmd:
+  - ['sh', '-c', 'mkdir -p /etc/nginx/certificates']
+  - ['sh', '-c', 'chown -R ${user}:${user} /etc/nginx/certificates']
