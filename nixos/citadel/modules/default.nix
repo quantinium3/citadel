@@ -6,5 +6,7 @@
     ./packages.nix
     ./user.nix
     ./tailscale.nix
+    ./virtualization.nix
+    ./http-echo.nix
   ];
 }
