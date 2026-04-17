@@ -10,7 +10,7 @@
   virtualisation.oci-containers.containers."http-echo-echo" = {
     image = "hashicorp/http-echo";
     ports = [
-      "5678:5678/tcp"
+      "127.0.0.1:5678:5678/tcp"
     ];
     cmd = [ "-text" "Welcome to Citadel" ];
     log-driver = "journald";
