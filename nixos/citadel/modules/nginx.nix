@@ -26,6 +26,19 @@
         };
       };
     };
+
+    virtualHosts."citadelstatus.quantinium.dev" = {
+      sslCertificate = "/etc/nginx/certificates/citadelstatus.quantinium.dev.pem";
+      sslCertificateKey = "/etc/nginx/certificates/citadelstatus.quantinium.dev.key";
+      forceSSL = true;
+
+      locations = {
+        "/" = {
+          proxyPass = "http://127.0.0.1:3001";
+        };
+      };
+    };
+
   };
 
   systemd.tmpfiles.rules = [

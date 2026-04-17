@@ -9,5 +9,6 @@
     ./virtualization.nix
     ./http-echo.nix
     ./uptime-kuma.nix
+    ./postgres.nix
   ];
 }
