@@ -7,8 +7,8 @@
 
 {
   age.secrets.postgres_user.file = ./../../secrets/postgres_user.age;
-  age.secret.postgres_database.file = ./../../secrets/postgres_database.age;
-  age.secret.postgres_password.file = ./../../secrets/postgres_password.age;
+  age.secrets.postgres_database.file = ./../../secrets/postgres_database.age;
+  age.secrets.postgres_password.file = ./../../secrets/postgres_password.age;
 
   virtualisation.oci-containers.containers."postgres" = {
     image = "postgres:18-alpine";
