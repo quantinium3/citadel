@@ -1,0 +1,12 @@
+- name: Hardening the Citadel Server
+  hosts: citadel
+  become: yes
+  vars_files:
+    - vars/vault.yml
+    - vars/main.yml
+  roles:
+    - common
+    - security
+    - docker
+    - containers
+    - nginx

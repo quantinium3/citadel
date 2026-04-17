@@ -1,0 +1,66 @@
+- name: Install dependencies for Docker repository
+  apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+    state: latest
+  tags: docker
+
+- name: Create directory for Docker GPG key
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  tags: docker
+
+- name: Add Docker official GPG key
+  get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+  tags: docker
+
+- name: Setup Docker DEB822 repository sources list
+  copy:
+    dest: /etc/apt/sources.list.d/docker.sources
+    content: |
+      Types: deb
+      URIs: https://download.docker.com/linux/ubuntu
+      Suites: {{ ansible_distribution_release }}
+      Components: stable
+      Architectures: {{ 'amd64' if ansible_architecture == 'x86_64' else ansible_architecture }}
+      Signed-By: /etc/apt/keyrings/docker.asc
+  tags: docker
+
+- name: Install Docker components
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: latest
+    update_cache: yes
+  tags: docker
+
+- name: Ensure docker group exists
+  group:
+    name: docker
+    state: present
+  tags: docker
+
+- name: Add user to docker group
+  user:
+    name: castellan
+    groups: docker
+    append: yes
+  tags: docker
+
+- name: Ensure Docker is started and enabled
+  service:
+    name: docker
+    state: started
+    enabled: yes
+  tags: docker

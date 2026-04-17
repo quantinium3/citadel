@@ -1,0 +1,70 @@
+- name: Create shared network
+  community.docker.docker_network:
+    name: citadel_network
+  tags: containers:postgres
+
+- name: Create shared postgres container
+  community.docker.docker_container:
+    name: "coffer"
+    image: "postgres:18-alpine"
+    state: started
+    restart_policy: always
+    env:
+      POSTGRES_USER: "{{ db_user }}"
+      POSTGRES_PASSWORD: "{{ db_password }}"
+      POSTGRES_DB: "postgres"
+    volumes:
+      - "postgres_data:/var/lib/postgresql/data"
+    networks:
+      - name: "citadel_network"
+        aliases:
+          - db
+  tags: containers:postgres
+
+- name: Create volume for postgres
+  community.docker.docker_volume:
+    name: postgres_data
+  tags: containers:postgres
+
+- name: Wait for PostgreSQL to become ready
+  community.docker.docker_container_exec:
+    container: "coffer"
+    command: pg_isready -U {{ db_user }}
+  register: result
+  until: result.rc == 0
+  retries: 5
+  delay: 2
+  tags: containers:postgres
+
+- name: Create additional databases
+  community.docker.docker_container_exec:
+    container: "coffer"
+    command: psql -U {{ db_user }} -d postgres -c "CREATE DATABASE {{ item }} OWNER {{ db_user }}"
+  loop:
+    - codecop
+  register: db_res
+  changed_when: "'CREATE DATABASE' in db_res.stdout"
+  failed_when: db_res.rc != 0 and 'already exists' not in db_res.stderr
+  tags: containers:postgres
+
+- name: Create app directory
+  file:
+    path: "/opt/containers/{{ item.subdomain }}"
+    state: directory
+  loop: "{{ services }}"
+  tags: containers:deploy
+
+- name: Deploy docker-compose.yml
+  template:
+    src: compose.yml.j2
+    dest: "/opt/containers/{{item.subdomain}}/docker-compose.yml"
+  loop: "{{ services }}"
+  register: app_configs
+  tags: containers:deploy
+
+- name: Spin up containers
+  community.docker.docker_compose_v2:
+    project_src: "/opt/containers/{{ item.subdomain }}"
+    state: present
+  loop: "{{ services }}"
+  tags: containers:deploy

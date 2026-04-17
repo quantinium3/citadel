@@ -1,0 +1,19 @@
+- name: Install base utility packages
+  apt:
+    name:
+      - curl
+      - git
+      - vim
+      - htop
+      - wget
+      - net-tools
+      - rsync
+      - postgresql-client-common
+    state: latest
+    update_cache: yes
+  tags: common
+
+- name: Install Python Package Manager
+  apt:
+    name: python3-pip
+  tags: common

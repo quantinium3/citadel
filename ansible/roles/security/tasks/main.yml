@@ -1,0 +1,67 @@
+- name: Update and upgrade apt packages
+  apt:
+    update_cache: yes
+    upgrade: dist
+    cache_valid_time: 3600
+  tags: security
+
+- name: Install security essentials
+  apt:
+    name:
+      - unattended-upgrades
+      - ufw
+      - fail2ban
+    state: latest
+  tags: security
+
+- name: Ensure fail2ban is running and enabled on boot.
+  service:
+    name: fail2ban
+    state: started
+    enabled: yes
+  tags: security
+
+- name: Set up authorized keys for the new user
+  authorized_key:
+    user: castellan
+    state: present
+    key: "{{ lookup('file', '~/.ssh/citadel-key.pub') }}"
+  tags: security
+
+- name: UFW - Allow all traffic from Tailscale
+  community.general.ufw:
+    rule: allow
+    interface: tailscale0
+    direction: in
+  tags: security
+
+- name: UFW - Allow OpenSSH (Emergency Backdoor)
+  community.general.ufw:
+    rule: limit
+    name: OpenSSH
+  tags: security
+
+- name: UFW - Set default deny policy
+  community.general.ufw:
+    state: enabled
+    policy: deny
+    direction: incoming
+  tags: security
+
+- name: UFW - Set logging
+  community.general.ufw:
+    logging: 'on'
+  tags: security
+
+- name: Set timezone to Asia/Kolkata
+  timezone:
+    name: Asia/Kolkata
+  tags: security
+
+- name: Remove unused packages.
+  package:
+    name:
+      - nano
+      - sendmail
+    state: absent
+  tags: security

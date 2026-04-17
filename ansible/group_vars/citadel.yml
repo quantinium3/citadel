@@ -1,0 +1,38 @@
+nginx_base_domain: "{{ lookup('env', 'DOMAIN') }}"
+
+nginx_services:
+  - subdomain: "citadel"
+    containers:
+      - name: "citadel"
+        image: "hashicorp/http-echo"
+        host_port: 5678
+        internal_port: 5678
+        command: '-text="Welcome to Citadel"'
+        path: "/"
+  - subdomain: "uptime-citadel"
+    containers:
+      - name: "uptime"
+        path: "/"
+        image: "louislam/uptime-kuma:2"
+        host_port: 3001
+        internal_port: 3001
+        env:
+          TZ: "UTC"
+          UMASK: 0022
+        volumes:
+          - "uptime_kuma_data:/app/data"
+          - /var/run/docker.sock:/var/run/docker.sock
+        extra:
+          healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:3001"]
+            interval: 30s
+            retries: 3
+            start_period: 10s
+            timeout: 5s
+          logging:
+            driver: "json-file"
+            options:
+              max-size: "10m"
+              max-file: "3"
+
+services: "{{ nginx_services }}"

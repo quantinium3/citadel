@@ -1,0 +1,54 @@
+services:
+{% for container in item.containers %}
+  {{ item.subdomain }}-{{ container.name }}:
+    image: "{{ container.image }}"
+    container_name: "{{ item.subdomain }}-{{ container.name }}"
+    restart: unless-stopped
+    networks:
+      - citadel_network
+    ports:
+      - "127.0.0.1:{{ container.host_port }}:{{ container.internal_port }}"
+{% if container.volumes is defined and container.volumes %}
+    volumes:
+{% for volume in container.volumes %}
+      - {{ volume }}
+{% endfor %}
+{% endif %}
+{% if container.command is defined %}
+    command: {{ container.command }}
+{% endif %}
+{% if container.env is defined and container.env %}
+    environment:
+{% for key, value in container.env.items() %}
+      {{ key }}: "{{ value }}"
+{% endfor %}
+{% endif %}
+{% if container.extra is defined %}
+{% for key, value in container.extra.items() %}
+    {{ key }}:
+{{ value | to_nice_yaml(indent=2) | indent(6, first=True) }}
+{% endfor %}
+{% endif %}
+
+{% endfor %}
+networks:
+  citadel_network:
+    external: true
+
+{% set named_volumes = [] %}
+{% for container in item.containers %}
+{% if container.volumes is defined %}
+{% for volume in container.volumes %}
+{% if ':' in volume and not volume.startswith('/') and not volume.startswith('.') %}
+{% set volume_name = volume.split(':')[0] %}
+{% if named_volumes.append(volume_name) %}{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% if named_volumes %}
+volumes:
+{% for volume in named_volumes | unique %}
+  {{ volume }}:
+{% endfor %}
+{% endif %}

@@ -1,0 +1,56 @@
+- name: Install Nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+  tags: nginx
+
+- name: Ensure nginx_base_domain is set
+  fail:
+    msg: "The variable 'nginx_base_domain' is empty. Did you export DOMAIN?"
+  when: nginx_base_domain == ""
+  tags: nginx
+
+- name: Verify SSL certificates exist on server
+  stat:
+    path: "/etc/nginx/certs/{{ item.subdomain }}.{{ nginx_base_domain }}.pem"
+  loop: "{{ nginx_services }}"
+  register: cert_files
+  tags: nginx
+
+- name: Fail if certificates are missing
+  fail:
+    msg: "Certificate missing for {{ item.item.subdomain }}.{{ nginx_base_domain }}"
+  when: not item.stat.exists
+  loop: "{{ cert_files.results }}"
+  tags: nginx
+
+- name: Deploy Subdomain Configurations
+  template:
+    src: nginx.conf.j2
+    dest: "/etc/nginx/sites-available/{{ item.subdomain }}.{{ nginx_base_domain }}.conf"
+  loop: "{{ nginx_services }}"
+  notify: reload nginx
+  tags: nginx
+
+- name: Enable Subdomain Sites
+  file:
+    src: "/etc/nginx/sites-available/{{ item.subdomain }}.{{ nginx_base_domain }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ item.subdomain }}.{{ nginx_base_domain }}.conf"
+    state: link
+  loop: "{{ nginx_services }}"
+  notify: reload nginx
+  tags: nginx
+
+- name: Remove default Nginx config
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload nginx
+  tags: nginx
+
+- name: Allow NGINX Full in ufw
+  community.general.ufw:
+    rule: allow
+    name: "Nginx Full"
+  tags: nginx
