@@ -5,24 +5,40 @@
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
 	"features": {
-		"ghcr.io/devcontainers/features/nix:1": {},
+		"ghcr.io/devcontainers/features/nix:1": {
+			"extraConf": "experimental-features = nix-command flakes"
+		},
 		"ghcr.io/devcontainers/features/terraform:1": {},
 		"ghcr.io/devcontainers-extra/features/age:1": {},
-		"ghcr.io/devcontainers-extra/features/ansible:2": {}
-	}
-
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"jnoortheen.nix-ide",
+				"hashicorp.terraform",
+				"arrterian.nix-env-selector"
+			],
+			"settings": {
+				"nix.enableLanguageServer": true,
+				"nix.serverPath": "nil"
+			}
+		}
+	},
+	"mounts": [
+		"source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind"
+	],
+	"runArgs": [
+		"--network=host"
+	],
+	"postCreateCommand": "nix-env -iA nixpkgs.nixos-rebuild nixpkgs.nil nixpkgs.git nixpkgs.ragenix nixpkgs.age"
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
-
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "uname -a",
-
 	// Configure tool-specific properties.
 	// "customizations": {},
-
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
 }
