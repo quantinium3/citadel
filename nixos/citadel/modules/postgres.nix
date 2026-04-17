@@ -22,10 +22,6 @@
     ];
     log-driver = "journald";
     extraOptions = [
-      "--health-cmd=pg_isready -U postgres"
-      "--health-interval=10s"
-      "--health-retries=5"
-      "--health-timeout=5s"
       "--network-alias=postgres"
       "--network=postgres_citadel"
     ];
